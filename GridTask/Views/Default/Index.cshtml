@@ -1,0 +1,141 @@
+﻿@model GridTask.Models.Company
+
+@using System.Web.Optimization
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Index";
+}
+
+@*<div style="width:60%;height:100%">
+    @(Html.Kendo().Grid<GridTask.Models.Company>()
+        .Name("BindGridUsingRead")
+        .Columns(columns =>
+        {
+            columns.Bound(p => p.Id).Width(15).Title("Sr. No.").Filterable(false);
+            columns.Bound(p => p.Name).Title("Name").Width(30).Filterable(false);
+            columns.Bound(p => p.CompanyId).Title("Company Id").Width(15).Filterable(false);
+        })
+           .Scrollable()
+           .Pageable(x => x.PageSizes(new List<object> { 10, 20, 100, 200, 500, "all" }).Refresh(true))
+            .Filterable(ftp => ftp.Mode(GridFilterMode.Row))
+            .Resizable(resize => resize.Columns(true))
+            .HtmlAttributes(new { style = "height: 100%" })
+            .Selectable()
+            .DataSource(dataSource => dataSource
+            .Ajax()
+            .Model(model => model.Id(p => p.Id))
+            .ServerOperation(false)
+            .Read(read => read.Action("BindGrid", "Default"))
+     )
+    )
+</div>*@
+@(Html.Kendo().Grid<GridTask.Models.Company>().Name("Grid").TableHtmlAttributes(new { @class = "table table-striped" })
+            .Columns(columns =>
+            {
+            columns.Bound(x => x.Id);
+            columns.Bound(x => x.Name);
+            columns.Bound(x => x.CompanyId);
+            columns.Template(@<text>
+        @Html.ActionLink("BindGrid", "Default", new { id = item.Id})
+            </text>)
+                                .HeaderTemplate("Options")
+                                .HeaderHtmlAttributes(new { @class = "text-center options-column" })
+                                .HtmlAttributes(new { @class = "text-center" })
+                                .ClientTemplate(
+                                    Html.ActionLink("BindGrid", "Default", new { id = "REPLACEME" }).ToHtmlString().Replace("REPLACEME", "#:Id#")
+                                );
+            })
+            .Pageable(p =>
+            {
+                p.Enabled(true);
+                p.PageSizes(new int[] { 5, 15, 25, 50, 100, 500 });
+            })
+            .Sortable()
+
+                                                .Filterable(filterable => filterable
+                                                .Extra(true)
+                                                .Operators(n => n
+                                                    .ForString(str => str.Clear()
+                                                        .Contains("Contains")
+                                                        .StartsWith("Starts with")
+                                                        .EndsWith("Ends with")
+                                                        .IsNotEqualTo("Is not equal to")
+                                                        .DoesNotContain("Does not contain")
+                                                    )))
+            .HtmlAttributes("options-column")
+            .DataSource(dataSource => dataSource.Ajax()
+                    .PageSize(15)
+                    .Destroy(update => update.Action("EditingInline_Destroy", "Grid"))
+                    .Read(read => read.Action("BindGrid", "Default")))
+            
+)
+
+
+
+<script type="text/javascript">
+
+function Show() {
+debugger;
+var data = $('#CNform').serialize();
+console.log(data);
+$.ajax({
+type: 'POST',
+cache: false,
+url: '/Default/GetGridData',
+data: data,
+success: function (data, textStatus, jqXHR) {
+},
+error: function (jqXHR, textStatus, errorThrown) {
+}
+});
+}
+</script> 
+  
+
+
+
+@using (Html.BeginForm("Index","Default",FormMethod.Post, new { @id = "CNform" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Employee</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Id, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Id, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.CompanyId, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.CompanyId, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.CompanyId, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "Index")
+</div>
+
