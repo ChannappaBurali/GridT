@@ -30,7 +30,7 @@
      )
     )
 </div>*@
-@(Html.Kendo().Grid<GridTask.Models.Company>().Name("Grid").TableHtmlAttributes(new { @class = "table table-striped" })
+@*@(Html.Kendo().Grid<GridTask.Models.Company>().Name("Grid").TableHtmlAttributes(new { @class = "table table-striped" })
             .Columns(columns =>
             {
             columns.Bound(x => x.Id);
@@ -90,12 +90,12 @@ error: function (jqXHR, textStatus, errorThrown) {
 }
 });
 }
-</script> 
+</script>*@ 
   
 
 
 
-@using (Html.BeginForm("Index","Default",FormMethod.Post, new { @id = "CNform" }))
+@*@using (Html.BeginForm("Index","Default",FormMethod.Post, new { @id = "CNform" }))
 {
     @Html.AntiForgeryToken()
 
@@ -137,5 +137,64 @@ error: function (jqXHR, textStatus, errorThrown) {
 
 <div>
     @Html.ActionLink("Back to List", "Index")
+</div>*@
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="input-group">
+            @Html.LabelFor(model => model.Id)
+            @Html.TextBoxFor(model => model.Id)
+
+            @Html.LabelFor(model => model.Name)
+            @Html.EditorFor(model => model.Name)
+
+            @Html.LabelFor(model => model.CompanyId)
+            @Html.TextBoxFor(model => model.CompanyId)
+        </div>
+    </div>
+    <br />
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="button" value="submit" id="btnAddToGrid">
+        </div>
+    </div>
 </div>
+<br />
+<div>
+    @(Html.Kendo().Grid<GridTask.Models.Company>().TableHtmlAttributes(new { @class = "table table-striped" })
+        .Name("MyKendoGrid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Width(30);
+            columns.Bound(c => c.Name).Width(50);
+            columns.Bound(c => c.CompanyId).Width(90);
+        })
+        .HtmlAttributes(new { style = "height: 350px;width: 500px;" })
+        .Scrollable()
+        .Groupable()
+        .Sortable()
+        .Pageable(pageable => pageable
+            .Refresh(true)
+            .PageSizes(true)
+            .ButtonCount(5))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+            .PageSize(20)
+        )
+    )
+</div>
+
+<script>
+    $("#btnAddToGrid").click(function () {
+        var Id = $('#Id').val();
+        var name = $('#Name').val();
+        var Comp = $('#CompanyId').val();
+        if (name == "") {
+            alert("Please fill all input fields");
+        }
+        var grid = $("#MyKendoGrid").data("kendoGrid");
+        var datasource = grid.dataSource;
+        datasource.insert({ Id: Id, Name: name, CompanyId: Comp });
+    });
+</script>
 
