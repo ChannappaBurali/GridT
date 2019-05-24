@@ -6,66 +6,56 @@ using System.Web.Mvc;
 using GridTask.Models;
 using Kendo.Mvc.UI;
 using Kendo.Mvc.Extensions;
+using GridTask.Models;
+using System.Data.Entity;
 
 namespace GridTask.Controllers
 {
     public class DefaultController : Controller
     {
+        TESTEntities db = new TESTEntities();
         // GET: Default
+        [HttpGet]
         public ActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public ActionResult Index(Company Emp)
+        public ActionResult Index(Emp emp)
         {
-            return View();
+ 
+            return View(emp);
         }
+        public ActionResult DataDisplay(Emp emp)
+        {                      
+            return View(emp);           
+        }
+        [HttpGet]
+        public ActionResult GetData(Emp emp)
+        {
+           // Emp ems = new Emp();
+           //TempData["id"] = emp.Id;
+           // TempData["Name"] = emp.Name;
+           // TempData["Address"] = emp.Address;
 
+          return  RedirectToAction("Index");
 
+        }
         public ActionResult BindGrid([DataSourceRequest]DataSourceRequest request)
         {
-            try
-            {
-               // decimal companyId = 0;
-                List<Models.Company> lst = new List<Models.Company>();
-                // lst = GetGridData(Convert.ToInt32(companyId)).ToList();
-                DataSourceResult result = lst.ToDataSourceResult(request, p => new Models.Company
-                {
-                    Id = p.Id,
-                    Name = p.Name,
-                    CompanyId = p.CompanyId,
-                });
-                return Json(result, JsonRequestBehavior.AllowGet);
-            }
-            catch (Exception ex)
-            {
-                var errorMsg = ex.Message.ToString();
-                return Json(errorMsg, JsonRequestBehavior.AllowGet);
-            }
+            return Json(GetGridData().ToDataSourceResult(request),JsonRequestBehavior.AllowGet);
         }
-        public IEnumerable<Models.Company> GetGridData(Company Emp)
+        public IEnumerable<Emp> GetGridData()
         {
-            Company Emp1 = new Company();
-            Emp1.Id = Emp.Id;
-            Emp1.Name = Emp.Name;
-            Emp1.CompanyId = Emp.CompanyId;
-            List<Models.Company> objCmp = new List<Models.Company>();
-            //List<Models.Company> listCompany = new List<Models.Company>();
-            //objCmp.Add(new Models.Company() { Id = 1, Name = "Rupesh Kahane", CompanyId = 20 });
-            //objCmp.Add(new Models.Company() { Id = 2, Name = "Vithal Wadje", CompanyId = 40 });
-            //objCmp.Add(new Models.Company() { Id = 3, Name = "Jeetendra Gund", CompanyId = 30 });
-            //objCmp.Add(new Models.Company() { Id = 4, Name = "Ashish Mane", CompanyId = 15 });
-            //objCmp.Add(new Models.Company() { Id = 5, Name = "Rinku Kulkarni", CompanyId = 18 });
-            //objCmp.Add(new Models.Company() { Id = 6, Name = "Priyanka Jain", CompanyId = 22 });
-            //if (companyId > 0)
-            //{
-            //    listCompany = objCmp.ToList().Where(a => a.CompanyId <= companyId).ToList();
-            //    return listCompany.AsEnumerable();
-            //}
-            objCmp.Add(Emp1);
-            return objCmp.ToList().AsEnumerable();
+          //  Emp Emp1 = new Emp();
+            return db.Employees.Select(em => new Emp
+            {
+                Id = em.Id,
+               Name = em.Name,                
+                Address = em.Address,
+                
+            });
         }
 
         public ActionResult FormDt()
@@ -76,6 +66,49 @@ namespace GridTask.Controllers
         public ActionResult FormDt(Company Emp)
         {
             return View();
+        }
+
+        [HttpPost]
+        public void Editing_Create([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<Emp> emp)
+        {
+          
+            foreach(var item in  emp)
+            {
+                Employee em = new Employee();
+                em.Name = item.Name;
+                em.Address = item.Address;
+                db.Employees.Add(em);
+                db.SaveChanges();              
+            }                 
+        }
+        [HttpPost]
+        public void Editing_Update([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<Emp> emp)
+        {
+            
+            foreach (var item in emp)
+            {
+                Employee em = new Employee();              
+                em.Id = item.Id;
+                em.Name = item.Name;
+                em.Address = item.Address;              
+                db.Entry(em).State = EntityState.Modified;
+                db.SaveChanges();                
+            }
+        }
+
+        [HttpPost]
+        public void Editing_Destroy([DataSourceRequest] DataSourceRequest request, [Bind(Prefix = "models")]IEnumerable<Emp> emp)
+        {
+           
+            foreach (var item in emp)
+            {               
+                var entity = new Employee();
+                Employee em = db.Employees.Find(item.Id);
+                db.Employees.Remove(em);
+                db.SaveChanges();                
+
+            }
+
         }
 
     }

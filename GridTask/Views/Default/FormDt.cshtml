@@ -1,56 +1,131 @@
-﻿@model GridTask.Models.Employee
-
+﻿@model GridTask.Models.Emp
+@using Kendo.Mvc.UI
 @{
     ViewBag.Title = "FormDt";
 }
 
 <h2>FormDt</h2>
 
+<script src="https://kendo.cdn.telerik.com/2019.1.220/js/jquery.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2019.1.220/js/kendo.all.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2019.1.220/js/kendo.web.min.js"></script>
+<script src=" https://kendo.cdn.telerik.com/2019.1.220/js/kendo.aspnetmvc.min.js"></script>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2019.1.220/styles/kendo.common-material.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2019.1.220/styles/kendo.material.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2019.1.220/styles/kendo.material.mobile.min.css" />
 
-@using (Html.BeginForm()) 
-{
-    @Html.AntiForgeryToken()
-    
-    <div class="form-horizontal">
-        <h4>Employee</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-        <div class="form-group">
-            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
-            </div>
-        </div>
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Address, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Address, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Address, "", new { @class = "text-danger" })
-            </div>
-        </div>
+@(Html.Kendo().Grid<GridTask.Models.Emp>()
+                                                .Name("grid")
+                                                   .Events(events =>
+                                                   {
+                                                       events.Change("onRowSelected");
+                                                       events.DataBound(@<text>function(e) {alert(2)}</text>);
+                                                       events.DataBinding(@<text>function(e) {alert(1)}</text>);
+                                                                })
+                                                         .Columns(columns =>
+                                                         {
+                                                             columns.Bound(c => c.Id);//.ClientTemplate("#:Id# <img src='image/avatar.png' />");
+                                                 columns.Bound(c => c.Name);
+                                                             columns.Bound(c => c.Address);
+                                                             columns.Bound(p => p.Address).ClientTemplate("<input type='checkbox' #=Address ? checked='checked' :'' # />");
+                                                             columns.Command(command => command.Destroy()).Width(150);
 
-        <div class="form-group">
-            @Html.LabelFor(model => model.Phone, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
-            </div>
-        </div>
+                                                         })
+                                                       .ToolBar(toolbar =>
+                                                       {
+                                                           toolbar.Create();
+                                                           toolbar.Save();
+                                                       })
+                                                       .Editable(editable => editable.Mode(GridEditMode.InCell))
+                                                        .HtmlAttributes(new { style = "height: 600px;" })
+                     .Pageable()
+                     .Navigatable()
+                     .Sortable()
+                     .Selectable()
+                     .Pageable(pageable => pageable
+                        .Refresh(true)
+                         .PageSizes(true)
+                        .ButtonCount(5))
+                     .Scrollable()
+                     .DataSource(dataSource => dataSource
+                         .Ajax()
+                         .Batch(true)
+                         .PageSize(20)
+                         .ServerOperation(false)
+                         //.Events(events => events.Error("error_handler"))
+                         .Model(model => model.Id(p => p.Id))
+                         .Create("Editing_Create", "Default")
+                         .Read("BindGrid", "Default")
+                         .Update("Editing_Update", "Default")
+                         .Destroy("Editing_Destroy", "Default")
+                     )
 
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Create" class="btn btn-default" />
-            </div>
-        </div>
-    </div>
-}
+                 //.Editable(editable => editable.Mode(GridEditMode.InCell))
+                 // .HtmlAttributes(new { style = "height: 550px;" })
+                 // .Scrollable()
+                 // .Selectable()
+                 // .Groupable()
+                 // .Sortable()
+                 // .Pageable(pageable => pageable
+                 //     .Refresh(true)
+                 //     .PageSizes(true)
+                 //     .ButtonCount(5))
+                 // .DataSource(dataSource => dataSource
+                 //     .Ajax()
+                 //     .Batch(true)
+                 //     .Read(read => read.Action("BindGrid", "Default"))
+                 //     .PageSize(20)
+                 // )
+
+
+)
+<style>
+    .customer-photo {
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-size: 32px 35px;
+        background-position: center center;
+        vertical-align: middle;
+        line-height: 32px;
+        box-shadow: inset 0 0 1px #999, inset 0 0 10px rgba(0,0,0,.2);
+        margin-left: 5px;
+    }
+
+    .customer-name {
+        display: inline-block;
+        vertical-align: middle;
+        line-height: 32px;
+        padding-left: 3px;
+    }
+</style>
+
+
 
 <div>
     @Html.ActionLink("Back to List", "Index")
 </div>
 
-<script src="~/Scripts/jquery-1.10.2.min.js"></script>
-<script src="~/Scripts/jquery.validate.min.js"></script>
-<script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    var selectedRow = null;
+    //onRowSelected
+    function onRowSelected(e) {
+        var row = this.dataItem(this.select());
+        $.ajax({
+            url: '/Default/Index',
+            type: 'POST',
+            // data: { row },
+            data: { 'Id': row.Id, 'Name': row.Name, 'Address': row.Address },
+            dataType: 'html',
+        });
+        console.log(row.Id + " " + row.Name + " " + row.Address);
+    }
+</script>
+
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.min.js"></script>*@
